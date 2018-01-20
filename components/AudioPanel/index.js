@@ -1,9 +1,9 @@
 import React from "react";
-import { Audio } from "expo";
+import { Audio, Font } from "expo";
 import { Text, View, Slider } from "react-native";
 import { Avatar } from "react-native-elements";
 
-import ProgramPlayingNowText from '../ProgramPlayingNowText';
+import ProgramPlayingNowText from "../ProgramPlayingNowText";
 
 export default class AudioPanel extends React.Component {
   constructor(props) {
@@ -18,7 +18,8 @@ export default class AudioPanel extends React.Component {
       volume: 1.0,
       playing: false,
       pending: false,
-      live: false
+      live: false,
+      fontLoaded: false
     };
 
     this.sound.setOnPlaybackStatusUpdate(
@@ -31,7 +32,7 @@ export default class AudioPanel extends React.Component {
     const { pending, playing } = this.state;
     if (!this.mounted) return;
 
-    console.log('status=', status);
+    console.log("status=", status);
 
     if (!status.isLoaded && playing && !retrying) {
       this.retryPlayback();
@@ -159,12 +160,17 @@ export default class AudioPanel extends React.Component {
       interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX
     }).then(_ => {
       if (this.props.autoplay) {
         this.startPlayback();
       }
-    })
+    });
+    Font.loadAsync({
+      MaterialIcons: require("react-native-vector-icons/Fonts/MaterialIcons.ttf")
+    }).then(() => {
+      this.setState({ fontLoaded: true });
+    });
   }
 
   componentWillUnmount() {
@@ -173,7 +179,7 @@ export default class AudioPanel extends React.Component {
   }
 
   render() {
-    const { playing, pending, message, live } = this.state;
+    const { playing, pending, message, live, fontLoaded } = this.state;
 
     return (
       <View
@@ -210,16 +216,18 @@ export default class AudioPanel extends React.Component {
             </Text>
           )}
         </View>
-        <Avatar
-          width={52}
-          height={52}
-          rounded
-          disabled={pending}
-          icon={{ name: playing ? "stop" : "play-arrow" }}
-          onPress={this.togglePlay}
-          activeOpacity={0.7}
-          containerStyle={{ marginRight: 5 }}
-        />
+        {fontLoaded ? (
+          <Avatar
+            width={52}
+            height={52}
+            rounded
+            disabled={pending}
+            icon={{ name: playing ? "stop" : "play-arrow" }}
+            onPress={this.togglePlay}
+            activeOpacity={0.7}
+            containerStyle={{ marginRight: 5 }}
+          />
+        ) : null}
       </View>
     );
   }
