@@ -13,6 +13,7 @@ export default class AudioPanel extends React.Component {
     this.sound = new Expo.Audio.Sound();
     this.retryTimer = 0;
     this.retrying = false;
+    this.recoveryTimeout = null;
     this.state = {
       message: "Tap play to start the stream",
       volume: 1.0,
@@ -36,8 +37,10 @@ export default class AudioPanel extends React.Component {
       this.retryPlayback();
     } else if (status.isPlaying) {
       this.setState({ message: "Playing", live: true });
+      clearTimeout(this.recoveryTimeout);
     } else if (!status.didJustFinish) {
       this.setState({ message: "Buffering...", live: false });
+      this.recoveryTimeout = setTimeout(() => this.retryPlayback(), 5000);
     }
   }
 
@@ -105,6 +108,7 @@ export default class AudioPanel extends React.Component {
     if (!playing || pending) return;
 
     clearTimeout(this.retryTimer);
+    clearTimeout(this.recoveryTimeout);
     this.setState({ playing: false, live: false, message: "Stopping..." });
 
     sound
@@ -203,14 +207,12 @@ export default class AudioPanel extends React.Component {
             onSlidingComplete={this.setVolume}
             onValueChange={volume => this.setState({ volume })}
           />
+          {playing ? <KeepAwake /> : null}
           {live ? (
-            <View>
-              <ProgramPlayingNowText
-                style={{ fontSize: 12, color: "#fff", paddingLeft: 16 }}
-                placeholder={message}
-              />
-              <KeepAwake />
-            </View>
+            <ProgramPlayingNowText
+              style={{ fontSize: 12, color: "#fff", paddingLeft: 16 }}
+              placeholder={message}
+            />
           ) : (
             <Text style={{ fontSize: 12, color: "#666", paddingLeft: 16 }}>
               {message}
