@@ -1,5 +1,5 @@
 import React from "react";
-import { Audio, Font } from "expo";
+import { Audio, Font, KeepAwake } from "expo";
 import { Text, View, Slider } from "react-native";
 import { Avatar } from "react-native-elements";
 
@@ -31,8 +31,6 @@ export default class AudioPanel extends React.Component {
     const { retrying } = this;
     const { pending, playing } = this.state;
     if (!this.mounted) return;
-
-    console.log("status=", status);
 
     if (!status.isLoaded && playing && !retrying) {
       this.retryPlayback();
@@ -206,10 +204,13 @@ export default class AudioPanel extends React.Component {
             onValueChange={volume => this.setState({ volume })}
           />
           {live ? (
-            <ProgramPlayingNowText
-              style={{ fontSize: 12, color: "#fff", paddingLeft: 16 }}
-              placeholder={message}
-            />
+            <View>
+              <ProgramPlayingNowText
+                style={{ fontSize: 12, color: "#fff", paddingLeft: 16 }}
+                placeholder={message}
+              />
+              <KeepAwake />
+            </View>
           ) : (
             <Text style={{ fontSize: 12, color: "#666", paddingLeft: 16 }}>
               {message}

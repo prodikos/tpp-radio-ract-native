@@ -24,9 +24,10 @@ function timeInBounds(date, start, end) {
 /**
  * Check if the given schedule is active
  */
-export function isBroadcastActive(broadcast) {
+export function isBroadcastActive(broadcast, day=null) {
   const now = getScheduleDate();
   if (broadcast.days.indexOf(now.getDay()) === -1) return false;
+  if (day != null && now.getDay() != day) return;
   return timeInBounds(now, broadcast.start, broadcast.end);
 }
 
@@ -49,6 +50,7 @@ export function getScheduleTable() {
   // Assign names on days
   for (let i = 0; i < 7; ++i) {
     days[i].name = DAY_NAMES[i];
+    days[i].day = i;
   }
 
   // Arrange broadcasts on days

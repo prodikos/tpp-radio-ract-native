@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-import { isBroadcastActive } from '../../util/Schedule';
+import { isBroadcastActive } from "../../util/Schedule";
 
 function padZeros(value, length) {
   let str = String(value);
@@ -12,7 +12,6 @@ function padZeros(value, length) {
 }
 
 export default class ProgramEntryDay extends React.Component {
-
   componentDidMount() {
     this.updateTimer = setInterval(() => this.forceUpdate(), 1000);
   }
@@ -21,8 +20,8 @@ export default class ProgramEntryDay extends React.Component {
     clearInterval(this.updateTimer);
   }
 
-  renderScheduleEntry(entry, idx) {
-    const active = isBroadcastActive(entry);
+  renderScheduleEntry(entry, idx, day) {
+    const active = isBroadcastActive(entry, day);
     let color = active ? "#ffa500" : "#fff";
 
     return (
@@ -61,7 +60,9 @@ export default class ProgramEntryDay extends React.Component {
     return (
       <View>
         {this.renderHeader(entry.name)}
-        {entry.map(this.renderScheduleEntry)}
+        {entry.map((program, idx) =>
+          this.renderScheduleEntry(program, idx, entry.day)
+        )}
       </View>
     );
   }
