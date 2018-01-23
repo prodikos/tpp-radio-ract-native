@@ -23,9 +23,10 @@
     "expo": "^23.0.0",
     "lodash": "^4.17.4",
     "react": "16.0.0",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-23.0.0.tar.gz",
+    "react-native": "0.50.3",
     "react-native-elements": "^0.18.3",
     "react-native-sound": "^0.10.4",
+    "react-native-vector-icons": "4.5.0",
     "rn-viewpager": "^1.2.9"
   },
   "rnpm": {
