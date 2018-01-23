@@ -1,5 +1,4 @@
 import React from "react";
-import { Font } from "expo";
 import {
   Image,
   Text,
@@ -9,26 +8,8 @@ import {
 } from "react-native";
 
 export default class Logo extends React.Component {
-  state = {
-    fontLoaded: false
-  };
-
-  componentDidMount() {
-    Font.loadAsync({
-      "roboto-slab-regular": require("./assets/RobotoSlab-Bold.ttf")
-    }).then(() => {
-      this.setState({ fontLoaded: true });
-    });
-  }
-
-  getFontFamily() {
-    const { fontLoaded } = this.state;
-    return fontLoaded ? "roboto-slab-regular" : "sans-serif";
-  }
 
   render() {
-    const fontFamily = this.getFontFamily();
-
     return (
       <TouchableWithoutFeedback
         onPress={() => Linking.openURL("https://www.thepressproject.gr/")}
@@ -46,13 +27,13 @@ export default class Logo extends React.Component {
             source={require("./assets/logo.png")}
           />
           <View style={{ height: 60, paddingLeft: 8 }}>
-            <Text style={{ color: "#FFF", fontFamily, fontSize: 30 }}>
+            <Text style={{ color: "#FFF", 'robotoSlabRegular', fontSize: 30 }}>
               The Press Project
             </Text>
             <Text
               style={{
                 color: "#b3c9d2",
-                fontFamily,
+                'robotoSlabRegular',
                 fontSize: 12,
                 paddingLeft: 4
               }}

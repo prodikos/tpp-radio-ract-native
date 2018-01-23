@@ -1,5 +1,4 @@
 import React from "react";
-import { Font } from "expo";
 import { FlatList, Image, Text, View, Linking } from "react-native";
 import { Avatar } from "react-native-elements";
 

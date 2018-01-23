@@ -1,5 +1,4 @@
 import React from "react";
-import { Font, KeepAwake } from "expo";
 import { Text, View, Slider } from "react-native";
 import { Avatar } from "react-native-elements";
 
@@ -34,13 +33,13 @@ export default class AudioPanel extends React.Component {
     this.setState({ live: playing });
   };
 
-  componentDidMount() {
-    Font.loadAsync({
-      MaterialIcons: require("react-native-vector-icons/Fonts/MaterialIcons.ttf")
-    }).then(() => {
-      this.setState({ fontLoaded: true });
-    });
-  }
+  // componentDidMount() {
+  //   Font.loadAsync({
+  //     MaterialIcons: require("react-native-vector-icons/Fonts/MaterialIcons.ttf")
+  //   }).then(() => {
+  //     this.setState({ fontLoaded: true });
+  //   });
+  // }
 
   render() {
     const { volume, playing, busy, message, live, fontLoaded } = this.state;
@@ -70,7 +69,6 @@ export default class AudioPanel extends React.Component {
             onSlidingComplete={this.handleVolumeChange}
             onValueChange={volume => this.setState({ volume })}
           />
-          {playing ? <KeepAwake /> : null}
           {live ? (
             <ProgramPlayingNowText
               style={{ fontSize: 12, color: "#fff", paddingLeft: 16 }}

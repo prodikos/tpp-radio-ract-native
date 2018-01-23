@@ -1,5 +1,4 @@
 import React from "react";
-import { Font } from "expo";
 import { Animated, StyleSheet, Text, View, ScrollView } from "react-native";
 import { IndicatorViewPager, PagerDotIndicator } from "rn-viewpager";
 

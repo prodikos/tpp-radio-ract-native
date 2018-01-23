@@ -27,5 +27,10 @@
     "react-native-elements": "^0.18.3",
     "react-native-sound": "^0.10.4",
     "rn-viewpager": "^1.2.9"
+  },
+  "rnpm": {
+      "assets": [
+    "./assets/fonts/"
+      ]
   }
 }

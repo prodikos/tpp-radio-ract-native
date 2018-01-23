@@ -1,5 +1,4 @@
 import React from "react";
-import { Font } from "expo";
 import { FlatList, Image, Text, View } from "react-native";
 import { List, ListItem } from "react-native-elements";
 import { Button, Linking } from "react-native";
