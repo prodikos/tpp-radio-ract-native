@@ -2,16 +2,33 @@ import React from "react";
 import { Animated, StyleSheet, Text, View, ScrollView } from "react-native";
 import { IndicatorViewPager, PagerDotIndicator } from "rn-viewpager";
 
-import Config from './Config';
-import { getCurrentBroadcast } from './util/Schedule';
+import { getConfig } from "./util/ConfigManager";
+import { getCurrentBroadcast } from "./util/Schedule";
 
 import Logo from "./components/Logo";
 import ChatPanel from "./components/ChatPanel";
 import AudioPanel from "./components/AudioPanel";
-import ProgramPanel from './components/ProgramPanel';
+import ProgramPanel from "./components/ProgramPanel";
 
 export default class App extends React.Component {
+  state = {
+    stream: null,
+    autoplay: false,
+    chatBaseUrl: ''
+  };
+
+  componentDidMount() {
+    getConfig().then(({ chatBaseUrl, schedule, stream }) => {
+      this.setState({
+        stream, schedule, chatBaseUrl,
+        autplay: getCurrentBroadcast(schedule)
+      });
+    });
+  }
+
   render() {
+    const { chatBaseUrl, schedule, stream, autplay } = this.state;
+
     return (
       <View style={styles.container}>
         <View style={{ height: 18 }} />
@@ -22,13 +39,13 @@ export default class App extends React.Component {
             indicator={<PagerDotIndicator pageCount={2} />}
           >
             <View>
-              <ProgramPanel />
+              <ProgramPanel schedule={schedule} />
             </View>
             <View>
-              <ChatPanel />
+              <ChatPanel chatBaseUrl={chatBaseUrl} />
             </View>
           </IndicatorViewPager>
-          <AudioPanel stream={Config.stream} autoplay={!!getCurrentBroadcast()} />
+          <AudioPanel stream={stream} autoplay={autplay} />
         </View>
       </View>
     );

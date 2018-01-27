@@ -1,7 +1,6 @@
-import { urlEncode } from "./Network";
 import { getClientIdAsync, renewClientIdAsync } from "./ClientID";
-
-import Config from '../Config';
+import { getConfig } from "./ConfigManager";
+import { urlEncode } from "./Network";
 
 /**
  * Parse chat features from the HTML response
@@ -76,7 +75,6 @@ function parseMessages(html) {
     dup_keys = {};
 
   while ((m = PARSE_MSGLINE.exec(html))) {
-
     // A little trick to avoid duplicate keys, yet
     // keeping the association correct
     let key = m[2] + ":" + m[5];
@@ -92,7 +90,6 @@ function parseMessages(html) {
       date: m[5],
       key: key
     });
-
   }
   return lines;
 }
@@ -101,100 +98,106 @@ function parseMessages(html) {
  * The chat client provides an abstraction to the BoomChat API
  */
 class ChatClient {
-  constructor(baseUrl, room = 1) {
-    this.baseUrl = baseUrl;
-    this.room = room;
-  }
-
   /**
    * Return all the messages in the chat asynchronously
    */
   getChatAsync() {
-    return fetch(
-      this.baseUrl +
-        "/system/chat_log.php?rank=1&access=4&room=1&bottom=1&target=none&rlc=0&clogs=0&chr=1&count=0&_" +
-        Date.now()
-    ).then(response => {
-      if (!response.ok) {
-        return null;
-      }
-
-      return response.text().then(buffer => {
-        if (!buffer) {
+    return getConfig().then(({ chatBaseUrl }) =>
+      fetch(
+        chatBaseUrl +
+          "/system/chat_log.php?rank=1&access=4&room=1&bottom=1&target=none&rlc=0&clogs=0&chr=1&count=0&_" +
+          Date.now()
+      ).then(response => {
+        if (!response.ok) {
           return null;
         }
 
-        const parsed = JSON.parse(buffer);
-        return parseMessages(parsed["log1"]);
-      });
-    });
+        return response.text().then(buffer => {
+          if (!buffer) {
+            return null;
+          }
+
+          const parsed = JSON.parse(buffer);
+          return parseMessages(parsed["log1"]);
+        });
+      })
+    );
   }
 
   /**
    * Update user status (online beacon)
    */
   updateUserPresence() {
-    return fetch(this.baseUrl + '/system/user_status.php?_=' + Date.now());
+    return getConfig().then(({ chatBaseUrl }) =>
+      fetch(chatBaseUrl + "/system/user_status.php?_=" + Date.now())
+    );
   }
 
   /**
    * Login as guest using the random client ID
    */
   loginGuestAsync() {
-    return getClientIdAsync().then(clientid => {
-      return fetch(this.baseUrl + "/registration.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: urlEncode({
-          password: "guest",
-          username: "tppmobile_" + clientid,
-          email: "guest@boomguest.com",
-          age: 0,
-          gender: 0,
-          country: 0,
-          region: 0,
-          uagree: true
+    return getConfig().then(({ chatBaseUrl }) =>
+      getClientIdAsync().then(clientid => {
+        return fetch(chatBaseUrl + "/registration.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: urlEncode({
+            password: "guest",
+            username: "tppmobile_" + clientid,
+            email: "guest@boomguest.com",
+            age: 0,
+            gender: 0,
+            country: 0,
+            region: 0,
+            uagree: true
+          })
         })
-      })
-      .then(response => response.text())
-      .then(code => {
-        const numCode = parseInt(code);
+          .then(response => response.text())
+          .then(code => {
+            const numCode = parseInt(code);
 
-        if (numCode == 5) { // ID already exists, get a new one and re-try
-          return renewClientIdAsync().then(_ => this.loginGuestAsync())
-        } else {
-          return this.updateUserPresence()
-        }
-      });
-    });
+            if (numCode == 5) {
+              // ID already exists, get a new one and re-try
+              return renewClientIdAsync().then(_ => this.loginGuestAsync());
+            } else {
+              return this.updateUserPresence();
+            }
+          });
+      })
+    );
   }
 
   /**
    * Login as a member with known password
    */
   loginMemberAsync(username, password) {
-    return fetch(this.baseUrl + "/login.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: urlEncode({
-        password: password,
-        username: username
-      })
-    }).then(_ => this.updateUserPresence());
+    return getConfig().then(({ chatBaseUrl }) =>
+      fetch(chatBaseUrl + "/login.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: urlEncode({
+          password: password,
+          username: username
+        })
+      }).then(_ => this.updateUserPresence())
+    );
   }
 
   /**
    * Log the user ount
    */
   logoutAsync() {
-    return fetch(this.baseUrl + "/logout.php");
+    return getConfig().then(({ chatBaseUrl }) =>
+      fetch(this.baseUrl + "/logout.php")
+    );
   }
 }
 
 // Export a singleton
-const chatClient = new ChatClient(Config.chatBaseUrl);
+const chatClient = new ChatClient();
 export default chatClient;

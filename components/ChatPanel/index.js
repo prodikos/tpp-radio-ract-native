@@ -17,25 +17,27 @@ export default class ChatPanel extends React.Component {
 
   componentDidMount() {
     // Try to fetch some messages. If we succeed we are logged in
-    ChatClient.getChatAsync().then(messages => {
-      if (messages != null) {
-        this.setState({ messages });
-        this.timer = setInterval(() => {
-          this.update();
-        }, 5000);
-        return;
-      }
+    ChatClient.getChatAsync()
+      .then(messages => {
+        if (messages != null) {
+          this.setState({ messages });
+          this.timer = setInterval(() => {
+            this.update();
+          }, 5000);
+          return;
+        }
 
-      // Otherwise login as guest & Update chat list
-      ChatClient.loginGuestAsync().then(ans => {
-        this.update();
-
-        // Start polling timer
-        this.timer = setInterval(() => {
+        // Otherwise login as guest & Update chat list
+        ChatClient.loginGuestAsync().then(ans => {
           this.update();
-        }, 5000);
-      });
-    });
+
+          // Start polling timer
+          this.timer = setInterval(() => {
+            this.update();
+          }, 5000);
+        });
+      })
+      .catch(e => {});
   }
 
   componentWillUnmount() {
@@ -44,18 +46,22 @@ export default class ChatPanel extends React.Component {
   }
 
   update() {
-    ChatClient.getChatAsync().then(messages => {
-      if (!messages) {
-        this.setState({ error: true });
-      } else {
-        this.setState({ messages });
-      }
-    });
-    ChatClient.updateUserPresence().then(_ => {});
+    ChatClient.getChatAsync()
+      .then(messages => {
+        if (!messages) {
+          this.setState({ error: true });
+        } else {
+          this.setState({ messages });
+        }
+      })
+      .catch(e => {});
+    ChatClient.updateUserPresence()
+      .then(_ => {})
+      .catch(_ => {});
   }
 
   renderMessage = ({ item, key, index }) => {
-    return <ChatMessage message={item} />;
+    return <ChatMessage chatBaseUrl={this.props.chatBaseUrl} message={item} />;
   };
 
   handleLayoutUpdate = e => {
