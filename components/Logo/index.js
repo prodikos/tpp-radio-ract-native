@@ -27,13 +27,13 @@ export default class Logo extends React.Component {
             source={require("./assets/logo.png")}
           />
           <View style={{ height: 60, paddingLeft: 8 }}>
-            <Text style={{ color: "#FFF", fontFamily: 'robotoSlabRegular', fontSize: 30 }}>
+            <Text style={{ color: "#FFF", fontFamily: 'RobotoSlab-Regular', fontSize: 30 }}>
               The Press Project
             </Text>
             <Text
               style={{
                 color: "#b3c9d2",
-                fontFamily: 'robotoSlabRegular',
+                fontFamily: 'RobotoSlab-Regular',
                 fontSize: 12,
                 paddingLeft: 4
               }}
