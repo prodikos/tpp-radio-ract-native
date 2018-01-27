@@ -6,14 +6,17 @@ import ProgramPlayingNowText from "../ProgramPlayingNowText";
 import AudioPlayer from "../AudioPlayer";
 
 export default class AudioPanel extends React.Component {
-  state = {
-    busy: false,
-    fontLoaded: false,
-    live: false,
-    message: "Tap play to start the stream",
-    playing: false,
-    volume: 1.0
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      busy: false,
+      live: false,
+      message: "Tap play to start the stream",
+      playing: !!props.autoplay,
+      volume: 1.0
+    };
+  }
 
   handlePlayButtonTap = () => {
     const { playing } = this.state;
@@ -42,7 +45,7 @@ export default class AudioPanel extends React.Component {
   // }
 
   render() {
-    const { volume, playing, busy, message, live, fontLoaded } = this.state;
+    const { volume, playing, busy, message, live } = this.state;
     const { stream } = this.props;
 
     return (
@@ -80,18 +83,16 @@ export default class AudioPanel extends React.Component {
             </Text>
           )}
         </View>
-        {fontLoaded ? (
-          <Avatar
-            width={52}
-            height={52}
-            rounded
-            disabled={busy}
-            icon={{ name: playing ? "stop" : "play-arrow" }}
-            onPress={this.handlePlayButtonTap}
-            activeOpacity={0.7}
-            containerStyle={{ marginRight: 5 }}
-          />
-        ) : null}
+        <Avatar
+          width={52}
+          height={52}
+          rounded
+          disabled={busy}
+          icon={{ name: playing ? "stop" : "play-arrow" }}
+          onPress={this.handlePlayButtonTap}
+          activeOpacity={0.7}
+          containerStyle={{ marginRight: 5 }}
+        />
         <AudioPlayer
           autorestart={true}
           playing={playing}
