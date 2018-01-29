@@ -18,7 +18,8 @@ export default class AudioPlayer extends React.Component {
     volume: PropTypes.number,
 
     onBusyChange: PropTypes.func,
-    onPlayingChange: PropTypes.func
+    onPlayingChange: PropTypes.func,
+    onStatusChange: PropTypes.func,
   };
 
   static defaultProps = {
@@ -28,18 +29,21 @@ export default class AudioPlayer extends React.Component {
     volume: 1.0,
 
     onBusyChange() {},
-    onPlayingChange() {}
+    onPlayingChange() {},
+    onStatusChange(prev, next) {}
   };
 
   constructor(props) {
     super(props);
 
     // Status flags
-    this.playing = false;
-    this.loaded = false;
-    this.retrying = false;
-    this.busy = false;
-    this.buffering = false;
+    this.flags = {
+      playing: false,
+      loaded: false,
+      retrying: false,
+      busy: false,
+      buffering: false
+    };
 
     // Local objects
     this.sound = null;
@@ -71,11 +75,12 @@ export default class AudioPlayer extends React.Component {
    */
   updateStatusFlags = flags => {
     console.debug(`AudioPlayer: Update flags=`, flags);
+    const original = Object.assign({}, this.flags);
     let triggerUpdate = false;
 
     Object.keys(flags).forEach(key => {
       const value = flags[key];
-      if (this[key] !== value) this[key] = value;
+      if (this.flags[key] !== value) this.flags[key] = value;
 
       if (key == "playing") {
         this.props.onPlayingChange(value);
@@ -83,13 +88,15 @@ export default class AudioPlayer extends React.Component {
         this.props.onBusyChange(value);
       }
     });
+
+    this.props.onStatusChange(this.flags, original);
   };
 
   /**
    * Check what's the current playback statis
    */
   handlePoll = _ => {
-    const { buffering } = this;
+    const { buffering } = this.flags;
     if (!this.sound) {
       return;
     }
@@ -374,10 +381,10 @@ export default class AudioPlayer extends React.Component {
       console.debug(`AudioPlayer: Playing changed to`, playing);
       if (playing) {
         // Start playback
-        if (this.playing) {
+        if (this.flags.playing) {
           console.debug(`AudioPlayer: Already playing, doing nothing`);
           return;
-        } else if (this.loaded) {
+        } else if (this.flags.loaded) {
           console.debug(`AudioPlayer: Loaded but not playing, will play`);
           this.startPlayback();
         } else {
@@ -386,17 +393,17 @@ export default class AudioPlayer extends React.Component {
         }
       } else {
         // Stop playback
-        if (!this.loaded) {
+        if (!this.flags.loaded) {
           console.debug(`AudioPlayer: Not loaded, doing nothing`);
           return;
         }
-        if (this.playing) {
+        if (this.flags.playing) {
           console.debug(`AudioPlayer: Playing, will try to stop and unload`);
           this.stopPlayback(() => {
             console.debug(`AudioPlayer: Stopped playing, will unload`);
             this.unloadSound();
           });
-        } else if (this.retrying) {
+        } else if (this.flags.retrying) {
           console.debug(
             `AudioPlayer: Not playing, but in a retry loop, will cancel`
           );
@@ -411,7 +418,7 @@ export default class AudioPlayer extends React.Component {
     // Change volume
     if (volume !== this.props.volume) {
       console.debug(`AudioPlayer: Changed volume to`, volume);
-      if (this.playing && this.sound != null) {
+      if (this.flags.playing && this.sound != null) {
         console.debug(`AudioPlayer: Changing live sound volume`);
         this.sound.setVolume(volume);
       }

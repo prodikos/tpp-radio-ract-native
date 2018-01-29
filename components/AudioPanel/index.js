@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, Slider } from "react-native";
+import { Text, View, Slider, ActivityIndicator, Platform } from "react-native";
 import { Avatar } from "react-native-elements";
 
 import ProgramPlayingNowText from "../ProgramPlayingNowText";
@@ -12,7 +12,8 @@ export default class AudioPanel extends React.Component {
     this.state = {
       busy: false,
       live: false,
-      message: "Tap play to start the stream",
+      buffering: false,
+      message: "TPP.Radio :: Tap Play to Start",
       playing: !!props.autoplay,
       volume: 1.0
     };
@@ -28,25 +29,19 @@ export default class AudioPanel extends React.Component {
     this.setState({ volume: volume });
   };
 
-  handleOnBusyChange = busy => {
-    this.setState({ busy });
+  handleStatusChange = (flags, oldFlags) => {
+    this.setState({
+      live: flags.playing,
+      busy: flags.busy,
+      buffering: flags.buffering
+    });
   };
-
-  handleOnPlayingChange = playing => {
-    this.setState({ live: playing });
-  };
-
-  // componentDidMount() {
-  //   Font.loadAsync({
-  //     MaterialIcons: require("react-native-vector-icons/Fonts/MaterialIcons.ttf")
-  //   }).then(() => {
-  //     this.setState({ fontLoaded: true });
-  //   });
-  // }
 
   render() {
-    const { volume, playing, busy, message, live } = this.state;
+    const { volume, playing, busy, message, live, buffering } = this.state;
     const { stream } = this.props;
+
+    const sliderMargin = (Platform.OS == 'ios') ? 10 : 0;
 
     return (
       <View
@@ -66,22 +61,44 @@ export default class AudioPanel extends React.Component {
           }}
         >
           <Slider
+            style={{marginLeft: sliderMargin, marginRight: sliderMargin}}
             thumbTintColor="#666"
             minimumTrackTintColor="#666"
             value={volume}
             onSlidingComplete={this.handleVolumeChange}
             onValueChange={volume => this.setState({ volume })}
           />
-          {live ? (
-            <ProgramPlayingNowText
-              style={{ fontSize: 12, color: "#fff", paddingLeft: 16 }}
-              placeholder={message}
-            />
-          ) : (
-            <Text style={{ fontSize: 12, color: "#666", paddingLeft: 16 }}>
-              {message}
-            </Text>
-          )}
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              paddingBottom: 10
+            }}
+          >
+            {(busy || buffering) ? (
+                <View>
+                  <ActivityIndicator
+                    style={{paddingLeft: 10}}
+                    color="#00ff00"
+                    size="small"
+                  />
+                </View>
+              ) : (
+                <View />
+              )}
+            {live ? (
+              <ProgramPlayingNowText
+                style={{ fontSize: 12, color: "#fff", marginLeft: 10 }}
+                placeholder={message}
+              />
+            ) : (
+              <Text style={{ fontSize: 12, color: "#666", marginLeft: 10 }}>
+                {message}
+              </Text>
+            )}
+          </View>
         </View>
         <Avatar
           width={52}
@@ -98,8 +115,7 @@ export default class AudioPanel extends React.Component {
           playing={playing}
           url={stream}
           volume={volume}
-          onBusyChange={this.handleOnBusyChange}
-          onPlayingChange={this.handleOnPlayingChange}
+          onStatusChange={this.handleStatusChange}
         />
       </View>
     );
