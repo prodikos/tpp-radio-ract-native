@@ -38,7 +38,7 @@ export default class Logo extends React.Component {
                 paddingLeft: 4
               }}
             >
-              Το ραδιόφωνο στη τσέπη σου
+              Αντικειμενική ενημέρωση, στην τσέπη σου
             </Text>
           </View>
         </View>
