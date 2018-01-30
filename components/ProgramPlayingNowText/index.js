@@ -1,21 +1,30 @@
+import PropTypes from "prop-types";
 import React from "react";
 import { Text, View } from "react-native";
 
+import { getConfig } from '../../util/ConfigManager';
 import { getCurrentBroadcast } from "../../util/Schedule";
 
 export default class ProgramPlayingNowText extends React.Component {
+  static propTypes = {
+    style: PropTypes.object,
+    placeholder: PropTypes.string,
+  };
+
   state = {
     active: null
   };
 
   updateProgram = () => {
     const { active } = this.state;
-    const newActive = getCurrentBroadcast();
-    if (newActive !== active) {
-      this.setState({
-        active: newActive
-      });
-    }
+    getConfig().then(({schedule}) => {
+      const newActive = getCurrentBroadcast(schedule);
+      if (newActive !== active) {
+        this.setState({
+          active: newActive
+        });
+      }
+    })
   };
 
   componentDidMount() {

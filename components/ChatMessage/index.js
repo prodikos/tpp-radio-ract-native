@@ -1,9 +1,7 @@
 import React from "react";
-import { Font } from "expo";
 import { FlatList, Image, Text, View, Linking } from "react-native";
 import { Avatar } from "react-native-elements";
 
-import ChatClient from "../../util/ChatClient";
 import InlineImage from "../../util/InlineImage";
 
 export default class ChatMessage extends React.Component {
@@ -28,7 +26,7 @@ export default class ChatMessage extends React.Component {
         return (
           <InlineImage
             key={idx}
-            source={{ uri: `${ChatClient.baseUrl}/${fragment.src}` }}
+            source={{ uri: `${this.props.chatBaseUrl}/${fragment.src}` }}
             style={{ width: 26, height: 26 }}
           />
         );
@@ -54,7 +52,7 @@ export default class ChatMessage extends React.Component {
         <Avatar
           small
           rounded
-          source={{ uri: `${ChatClient.baseUrl}/${avatar}` }}
+          source={{ uri: `${this.props.chatBaseUrl}/${avatar}` }}
           activeOpacity={0.7}
         />
         <View style={{ flex: 1, justifyContent: "center", paddingLeft: 5 }}>

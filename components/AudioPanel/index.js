@@ -1,187 +1,48 @@
 import React from "react";
-import { Audio, Font, KeepAwake } from "expo";
-import { Text, View, Slider } from "react-native";
+import { Text, View, Slider, ActivityIndicator, Platform } from "react-native";
 import { Avatar } from "react-native-elements";
 
 import ProgramPlayingNowText from "../ProgramPlayingNowText";
+import AudioPlayer from "../AudioPlayer";
+import SystemNotification from '../SystemNotification';
 
 export default class AudioPanel extends React.Component {
   constructor(props) {
     super(props);
 
-    this.mounted = false;
-    this.sound = new Expo.Audio.Sound();
-    this.retryTimer = 0;
-    this.retrying = false;
-    this.recoveryTimeout = null;
     this.state = {
-      message: "Tap play to start the stream",
-      volume: 1.0,
-      playing: false,
-      pending: false,
+      busy: false,
       live: false,
-      fontLoaded: false
+      buffering: false,
+      message: "TPP.Radio :: Tap Play to Start",
+      playing: !!props.autoplay,
+      volume: 1.0
     };
-
-    this.sound.setOnPlaybackStatusUpdate(
-      this.handlePlaybackStatusUpdate.bind(this)
-    );
   }
 
-  handlePlaybackStatusUpdate(status) {
-    const { retrying } = this;
-    const { pending, playing } = this.state;
-    if (!this.mounted) return;
-
-    if (!status.isLoaded && playing && !retrying) {
-      this.retryPlayback();
-    } else if (status.isPlaying) {
-      this.setState({ message: "Playing", live: true });
-      clearTimeout(this.recoveryTimeout);
-    } else if (!status.didJustFinish) {
-      this.setState({ message: "Buffering...", live: false });
-      this.recoveryTimeout = setTimeout(() => this.retryPlayback(), 5000);
-    }
-  }
-
-  retryPlayback = () => {
-    const { sound } = this;
-    if (this.retrying) return;
-    this.retrying = true;
-
-    sound.unloadAsync().then(_ => {
-      this.setState({
-        message: "Playback error (will try again in 5 sec)",
-        live: false
-      });
-
-      this.retryTimer = setTimeout(() => this.startPlayback(true), 5000);
-    });
+  handlePlayButtonTap = () => {
+    const { playing } = this.state;
+    this.setState({ playing: !playing });
   };
 
-  startPlayback = (fromRetry = false) => {
-    const { sound } = this;
-    const { stream } = this.props;
-    const { pending, playing, volume } = this.state;
-    if (!fromRetry && (playing || pending)) return;
+  handleVolumeChange = volume => {
+    const { playing } = this.state;
+    this.setState({ volume: volume });
+  };
 
-    this.retrying = false;
+  handleStatusChange = (flags, oldFlags) => {
     this.setState({
-      live: false,
-      playing: true,
-      pending: true,
-      message: "Connecting to server..."
+      live: flags.playing,
+      busy: flags.busy,
+      buffering: flags.buffering
     });
-    try {
-      sound
-        .loadAsync(
-          // { uri: "http://stream.radiojar.com/qgra821mrtwtv" },
-          // {uri: 'http://www.noiseaddicts.com/samples_1w72b820/3919.mp3'},
-          { uri: stream },
-          {
-            shouldPlay: true,
-            rate: 1.0,
-            shouldCorrectPitch: true,
-            volume: volume,
-            isMuted: false,
-            isLooping: false
-          },
-          false
-        )
-        .then(status => {
-          this.setState({ pending: false });
-
-          if (!status.isLoaded) {
-            this.retryPlayback();
-          } else {
-            this.setState({ message: "Buffering..." });
-          }
-        });
-    } catch (e) {
-      this.retryPlayback();
-    }
   };
-
-  stopPlayback = () => {
-    const { sound } = this;
-    const { pending, playing } = this.state;
-    if (!playing || pending) return;
-
-    clearTimeout(this.retryTimer);
-    clearTimeout(this.recoveryTimeout);
-    this.setState({ playing: false, live: false, message: "Stopping..." });
-
-    sound
-      .stopAsync()
-      .then(_ => {
-        sound.unloadAsync().then(_ => {
-          this.setState({
-            pending: false,
-            message: "Tap play to start the stream"
-          });
-        });
-      })
-      .catch(e => {
-        this.setState({ pending: false, message: "Something went wrong" });
-        sound
-          .unloadAsync()
-          .then(_ => {
-            this.setState({
-              pending: false,
-              message: "Tap play to start the stream"
-            });
-          })
-          .catch(e => {
-            /* sink */
-          });
-      });
-  };
-
-  togglePlay = () => {
-    const { playing } = this.state;
-    if (playing) {
-      this.stopPlayback();
-    } else {
-      this.startPlayback();
-    }
-  };
-
-  setVolume = volume => {
-    const { sound } = this;
-    const { playing } = this.state;
-
-    if (playing) {
-      sound.setVolumeAsync(volume);
-    }
-  };
-
-  componentDidMount() {
-    this.mounted = true;
-    Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX
-    }).then(_ => {
-      if (this.props.autoplay) {
-        this.startPlayback();
-      }
-    });
-    Font.loadAsync({
-      MaterialIcons: require("react-native-vector-icons/Fonts/MaterialIcons.ttf")
-    }).then(() => {
-      this.setState({ fontLoaded: true });
-    });
-  }
-
-  componentWillUnmount() {
-    this.mounted = false;
-    clearTimeout(this.retryTimer);
-  }
 
   render() {
-    const { playing, pending, message, live, fontLoaded } = this.state;
+    const { volume, playing, busy, message, live, buffering } = this.state;
+    const { stream } = this.props;
+
+    const sliderMargin = (Platform.OS == 'ios') ? 10 : 0;
 
     return (
       <View
@@ -201,36 +62,65 @@ export default class AudioPanel extends React.Component {
           }}
         >
           <Slider
+            style={{marginLeft: sliderMargin, marginRight: sliderMargin}}
             thumbTintColor="#666"
             minimumTrackTintColor="#666"
-            value={this.state.volume}
-            onSlidingComplete={this.setVolume}
+            value={volume}
+            onSlidingComplete={this.handleVolumeChange}
             onValueChange={volume => this.setState({ volume })}
           />
-          {playing ? <KeepAwake /> : null}
-          {live ? (
-            <ProgramPlayingNowText
-              style={{ fontSize: 12, color: "#fff", paddingLeft: 16 }}
-              placeholder={message}
-            />
-          ) : (
-            <Text style={{ fontSize: 12, color: "#666", paddingLeft: 16 }}>
-              {message}
-            </Text>
-          )}
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              paddingBottom: 10
+            }}
+          >
+            {(playing && (busy || buffering)) ? (
+                <View>
+                  <ActivityIndicator
+                    style={{paddingLeft: 10}}
+                    color="#00ff00"
+                    size="small"
+                  />
+                </View>
+              ) : (
+                <View />
+              )}
+            {live ? (
+              <ProgramPlayingNowText
+                style={{ fontSize: 12, color: "#fff", marginLeft: 10 }}
+                placeholder={message}
+              />
+            ) : (
+              <Text style={{ fontSize: 12, color: "#666", marginLeft: 10 }}>
+                {message}
+              </Text>
+            )}
+          </View>
         </View>
-        {fontLoaded ? (
-          <Avatar
-            width={52}
-            height={52}
-            rounded
-            disabled={pending}
-            icon={{ name: playing ? "stop" : "play-arrow" }}
-            onPress={this.togglePlay}
-            activeOpacity={0.7}
-            containerStyle={{ marginRight: 5 }}
-          />
-        ) : null}
+        <Avatar
+          width={52}
+          height={52}
+          rounded
+          icon={{ name: playing ? "stop" : "play-arrow" }}
+          onPress={this.handlePlayButtonTap}
+          activeOpacity={0.7}
+          containerStyle={{ marginRight: 5 }}
+        />
+        <AudioPlayer
+          autorestart={true}
+          playing={playing}
+          url={stream}
+          volume={volume}
+          onStatusChange={this.handleStatusChange}
+        />
+        <SystemNotification
+          title="TPP.Radio"
+          message="You are currently listening to TPP Radio"
+          visible={playing} />
       </View>
     );
   }

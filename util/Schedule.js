@@ -1,5 +1,3 @@
-import Config from "../Config";
-
 const DAY_NAMES = [
   "Κυριακή",
   "Δευτέρα",
@@ -24,8 +22,8 @@ function timeInBounds(date, start, end) {
 /**
  * Check if the given schedule is active
  */
-export function isBroadcastActive(broadcast, day=null) {
-  const now = getScheduleDate();
+export function isBroadcastActive(schedule, broadcast, day=null) {
+  const now = getScheduleDate(schedule);
   if (broadcast.days.indexOf(now.getDay()) === -1) return false;
   if (day != null && now.getDay() != day) return;
   return timeInBounds(now, broadcast.start, broadcast.end);
@@ -34,18 +32,18 @@ export function isBroadcastActive(broadcast, day=null) {
 /**
  * Get a date object on the timezone of the schedule
  */
-export function getScheduleDate() {
+export function getScheduleDate(schedule) {
   const d = new Date();
   const utc = d.getTime() + d.getTimezoneOffset() * 60000;
-  return new Date(utc + 3600000 * parseInt(Config.schedule.timezone));
+  return new Date(utc + 3600000 * parseInt(schedule.timezone));
 }
 
 /**
  * Compose a table of the broadcast schedule for each day
  */
-export function getScheduleTable() {
+export function getScheduleTable(schedule) {
   const days = [[], [], [], [], [], [], []];
-  const now = getScheduleDate();
+  const now = getScheduleDate(schedule);
 
   // Assign names on days
   for (let i = 0; i < 7; ++i) {
@@ -54,7 +52,7 @@ export function getScheduleTable() {
   }
 
   // Arrange broadcasts on days
-  Config.schedule.broadcasts.forEach(broadcast => {
+  schedule.broadcasts.forEach(broadcast => {
     broadcast.days.forEach(day => {
       days[day].push(broadcast);
     });
@@ -80,10 +78,10 @@ export function getScheduleTable() {
 /**
  * Walk the schedule and find what's the current broadcast
  */
-export function getCurrentBroadcast() {
-  const now = getScheduleDate();
+export function getCurrentBroadcast(schedule) {
+  const now = getScheduleDate(schedule);
 
-  return Config.schedule.broadcasts.find(broadcast => {
+  return schedule.broadcasts.find(broadcast => {
     if (broadcast.days.indexOf(now.getDay()) === -1) return false;
     return timeInBounds(now, broadcast.start, broadcast.end);
   });

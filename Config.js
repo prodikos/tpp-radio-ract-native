@@ -1,4 +1,5 @@
 const Config = {
+
   /**
    * The base directory where the BoomChat is hosted
    */
@@ -8,7 +9,6 @@ const Config = {
    * The link to the audio stream
    */
   stream: "http://stream.radiojar.com/qgra821mrtwtv",
-  // "stream": "http://www.noiseaddicts.com/samples_1w72b820/3919.mp3",
 
   /**
    * The program of the broadcasts

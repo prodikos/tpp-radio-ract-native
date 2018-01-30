@@ -1,5 +1,4 @@
 import React from "react";
-import { Font } from "expo";
 import { FlatList, Image, Text, View } from "react-native";
 import { List, ListItem } from "react-native-elements";
 import { Button, Linking } from "react-native";
@@ -9,7 +8,7 @@ import ChatClient from "../../util/ChatClient";
 import ChatMessage from "../ChatMessage";
 
 export default class ChatPanel extends React.Component {
-  timer = null;
+  updateTimer = null;
   state = {
     messages: [],
     error: false,
@@ -17,46 +16,37 @@ export default class ChatPanel extends React.Component {
   };
 
   componentDidMount() {
-    // Try to fetch some messages. If we succeed we are logged in
-    ChatClient.getChatAsync().then(messages => {
-      if (messages != null) {
-        this.setState({ messages });
-        this.timer = setInterval(() => {
-          this.update();
-        }, 5000);
-        return;
-      }
-
-      // Otherwise login as guest & Update chat list
-      ChatClient.loginGuestAsync().then(ans => {
-        this.update();
-
-        // Start polling timer
-        this.timer = setInterval(() => {
-          this.update();
-        }, 5000);
-      });
-    });
+    this.update();
+    this.updateTimer = setInterval(this.update, 5000);
   }
 
   componentWillUnmount() {
-    clearInterval(this.timer);
+    clearInterval(this.updateTimer);
     ChatClient.logoutAsync();
   }
 
-  update() {
-    ChatClient.getChatAsync().then(messages => {
-      if (!messages) {
-        this.setState({ error: true });
-      } else {
-        this.setState({ messages });
-      }
-    });
-    ChatClient.updateUserPresence().then(_ => {});
+  update = () => {
+    // Try to fetch some messages. If we succeed we are logged in
+    ChatClient.getChatAsync()
+      .then(messages => {
+        if (messages != null) {
+          this.setState({ messages });
+          ChatClient.updateUserPresence()
+            .then(_ => {})
+            .catch(_ => {});
+          return;
+        }
+
+        // Otherwise login as guest & Update chat list
+        ChatClient.loginGuestAsync().then(ans => {
+          this.update();
+        });
+      })
+      .catch(e => {});
   }
 
   renderMessage = ({ item, key, index }) => {
-    return <ChatMessage message={item} />;
+    return <ChatMessage chatBaseUrl={this.props.chatBaseUrl} message={item} />;
   };
 
   handleLayoutUpdate = e => {

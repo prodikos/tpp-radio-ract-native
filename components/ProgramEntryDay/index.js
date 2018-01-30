@@ -1,8 +1,12 @@
+import PropTypes from "prop-types";
 import React from "react";
 import { Text, View } from "react-native";
 
 import { isBroadcastActive } from "../../util/Schedule";
 
+/**
+ * Pad the given string with zeros till the given length is reached
+ */
 function padZeros(value, length) {
   let str = String(value);
   while (str.length < length) {
@@ -12,6 +16,11 @@ function padZeros(value, length) {
 }
 
 export default class ProgramEntryDay extends React.Component {
+  static propTypes = {
+    schedule: PropTypes.object,
+    entry: PropTypes.array
+  };
+
   componentDidMount() {
     this.updateTimer = setInterval(() => this.forceUpdate(), 1000);
   }
@@ -21,7 +30,8 @@ export default class ProgramEntryDay extends React.Component {
   }
 
   renderScheduleEntry(entry, idx, day) {
-    const active = isBroadcastActive(entry, day);
+    const { schedule } = this.props;
+    const active = isBroadcastActive(schedule, entry, day);
     let color = active ? "#ffa500" : "#fff";
 
     return (
