@@ -13,10 +13,6 @@ var getConfigSingleton = null;
 export function getConfig() {
   if (getConfigSingleton == null) {
     getConfigSingleton = new Promise(resolve => {
-      resolve(DefaultConfig);
-      return;
-
-
       console.debug("ConfigManager: Checking stored config");
 
       AsyncStorage.getItem(CONFIG_KEY).then(result => {
