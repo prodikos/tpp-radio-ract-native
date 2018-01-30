@@ -1,9 +1,20 @@
 # tpp-radio-ract-native
-The Press Project - Radio - Mobile App
 
-## Try it
+> The mobile application for thepressproject.gr
 
-You can try this application on expo.io : [https://expo.io/@prodikos/tpp-radio-app](@prodikos/tpp-radio-app)
+## Overview
+
+![News](/doc/images/panel-news.jpg?raw=true) ![Radio Program](/doc/images/panel-radio.jpg?raw=true)
+ ![Chat](/doc/images/panel-chat.jpg?raw=true)
+
+This application is available for both Android and iOS, however not yet available in the stores since it's currently in development.
+
+### Install Development Version
+
+If you have an android you can install the development version by:
+
+1. Allowing installation from untrusted sources
+2. Downloading and installing the `.apk` file from the [latest release](https://github.com/prodikos/tpp-radio-ract-native/releases)
 
 ## Development
 
