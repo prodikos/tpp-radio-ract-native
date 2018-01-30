@@ -93,6 +93,25 @@ def enableSeparateBuildPerCPUArchitecture = false
  */
 def enableProguardInReleaseBuilds = false
 
+/**
+ * Access passwords stored in the keychain
+ */
+def getPassword(String currentUser, String keyChain) {
+   def stdout = new ByteArrayOutputStream()
+   def stderr = new ByteArrayOutputStream()
+   exec {
+       commandLine 'security', '-q', 'find-generic-password', '-a', currentUser, '-s', keyChain, '-w'
+       standardOutput = stdout
+       errorOutput = stderr
+       ignoreExitValue true
+   }
+   //noinspection GroovyAssignabilityCheck
+   stdout.toString().trim()
+}
+
+def keystorePassword = getPassword(System.properties['user.name'], "tpp_keystore")
+def keystoreKeyPassword = getPassword(System.properties['user.name'], "tpp_keystore-tpp_app")
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
@@ -107,6 +126,14 @@ android {
             abiFilters "armeabi-v7a", "x86"
         }
     }
+    signingConfigs {
+        release {
+            storeFile file(APP_RELEASE_KEYSTORE)
+            storePassword keystorePassword
+            keyAlias APP_RELEASE_KEY_ALIAS
+            keyPassword keystoreKeyPassword
+        }
+    }
     splits {
         abi {
             reset()
@@ -119,6 +146,7 @@ android {
         release {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
         }
     }
     // applicationVariants are e.g. debug, release
