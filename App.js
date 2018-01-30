@@ -9,6 +9,7 @@ import Logo from "./components/Logo";
 import ChatPanel from "./components/ChatPanel";
 import AudioPanel from "./components/AudioPanel";
 import ProgramPanel from "./components/ProgramPanel";
+import NewsPanel from './components/NewsPanel';
 
 export default class App extends React.Component {
   state = {
@@ -36,8 +37,11 @@ export default class App extends React.Component {
         <View style={{ flex: 1 }}>
           <IndicatorViewPager
             style={{ flex: 1 }}
-            indicator={<PagerDotIndicator pageCount={2} />}
+            indicator={<PagerDotIndicator pageCount={3} />}
           >
+            <View>
+              <NewsPanel topNews={5} />
+            </View>
             <View>
               <ProgramPanel schedule={schedule} />
             </View>
