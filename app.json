@@ -3,7 +3,7 @@
     "name": "TPP.Radio",
     "description": "Ακούστε LIVE τις εκπομπές του Thepressproject.gr και παρακολουθήστε τις συζητήσεις στο chat σε πραγματικό χρόνο, μεσα απο αυτή την εφαρμογή!",
     "icon": "./assets/icons/tpp-radio.png",
-    "version": "0.1.3",
+    "version": "0.2.0",
     "slug": "tpp-radio-app",
     "sdkVersion": "23.0.0",
     "ios": {
