@@ -78,7 +78,7 @@ export default class AudioPanel extends React.Component {
               paddingBottom: 10
             }}
           >
-            {(busy || buffering) ? (
+            {(playing && (busy || buffering)) ? (
                 <View>
                   <ActivityIndicator
                     style={{paddingLeft: 10}}
@@ -105,7 +105,6 @@ export default class AudioPanel extends React.Component {
           width={52}
           height={52}
           rounded
-          disabled={busy}
           icon={{ name: playing ? "stop" : "play-arrow" }}
           onPress={this.handlePlayButtonTap}
           activeOpacity={0.7}
