@@ -1,5 +1,5 @@
 import React from "react";
-import { Animated, StyleSheet, Text, View, ScrollView } from "react-native";
+import { BackHandler, Animated, StyleSheet, Text, View, ScrollView } from "react-native";
 import { IndicatorViewPager, PagerDotIndicator } from "rn-viewpager";
 
 import { getConfig } from "./util/ConfigManager";
@@ -15,16 +15,39 @@ export default class App extends React.Component {
   state = {
     stream: null,
     autoplay: false,
-    chatBaseUrl: ''
+    chatBaseUrl: '',
+    backPressed: false
+  };
+
+  /**
+   * Double-back exits the app, single tap is ignored
+   */
+  handleBackPress = () => {
+    const {backPressed} = this.state;
+    if (backPressed) {
+      BackHandler.exitApp();
+    } else {
+      this.setState({backPressed: true});
+      setTimeout(() => {
+        this.setState({backPressed: false})
+      }, 1000);
+    }
+
+    return true;
   };
 
   componentDidMount() {
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
     getConfig().then(({ chatBaseUrl, schedule, stream }) => {
       this.setState({
         stream, schedule, chatBaseUrl,
         autplay: getCurrentBroadcast(schedule)
       });
     });
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);
   }
 
   render() {
