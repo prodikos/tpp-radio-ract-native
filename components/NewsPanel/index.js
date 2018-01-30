@@ -48,11 +48,14 @@ export default class NewsPanel extends React.Component {
 
   handleNewsUpdate = news => {
     const { topNews } = this.props;
-    const sorted = news.map(item =>
-      Object.assign({}, item, { key: item.guid, ts: moment(item.date, DATE_FORMAT).unix() })
-    ).sort(
-      (a, b) => b.ts - a.ts
-    );
+    const sorted = news
+      .map(item =>
+        Object.assign({}, item, {
+          key: item.guid,
+          ts: moment(item.date, DATE_FORMAT).unix()
+        })
+      )
+      .sort((a, b) => b.ts - a.ts);
 
     const news_top = sorted.slice(0, topNews);
     const news_other = sorted.slice(topNews);
@@ -65,7 +68,9 @@ export default class NewsPanel extends React.Component {
     this.updateTimer = setInterval(this.updateNews, 60000);
     NewsProvider.lastResults().then(news => {
       this.handleNewsUpdate(news);
-      NewsProvider.update().then(news => this.handleNewsUpdate(news));
+      NewsProvider.update()
+        .then(news => this.handleNewsUpdate(news))
+        .catch(_ => this.setState({ refreshing: false }));
     });
   }
 
@@ -76,7 +81,9 @@ export default class NewsPanel extends React.Component {
 
   updateNews = () => {
     this.setState({ refreshing: true });
-    NewsProvider.update().then(news => this.handleNewsUpdate(news));
+    NewsProvider.update()
+      .then(news => this.handleNewsUpdate(news))
+      .catch(_ => this.setState({ refreshing: false }));
   };
 
   renderTopNewsItem = ({ item }) => {
