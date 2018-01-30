@@ -4,6 +4,7 @@ import { Avatar } from "react-native-elements";
 
 import ProgramPlayingNowText from "../ProgramPlayingNowText";
 import AudioPlayer from "../AudioPlayer";
+import SystemNotification from '../SystemNotification';
 
 export default class AudioPanel extends React.Component {
   constructor(props) {
@@ -117,6 +118,10 @@ export default class AudioPanel extends React.Component {
           volume={volume}
           onStatusChange={this.handleStatusChange}
         />
+        <SystemNotification
+          title="TPP.Radio"
+          message="You are currently listening to TPP Radio"
+          visible={playing} />
       </View>
     );
   }

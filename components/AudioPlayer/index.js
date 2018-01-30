@@ -238,7 +238,7 @@ export default class AudioPlayer extends React.Component {
   unloadSound() {
     console.debug(`AudioPlayer: Unloading`);
     if (this.sound) {
-      this.updateStatusFlags({ loaded: false });
+      this.updateStatusFlags({ loaded: false, buffering: false });
       this.sound.release();
       this.sound = null;
     }
@@ -317,7 +317,7 @@ export default class AudioPlayer extends React.Component {
       console.debug(`AudioPlayer: Stop: Failed to stop sound on time`);
       callback();
     }, 5000);
-    this.updateStatusFlags({ busy: true });
+    this.updateStatusFlags({ busy: true, buffering: false });
     this.sound.getCurrentTime((seconds, isPlaying) => {
       // If the audio is not already playing, we are done
       if (!isPlaying) {

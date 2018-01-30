@@ -21,7 +21,8 @@
     "react": "16.0.0",
     "react-native": "0.50.3",
     "react-native-elements": "^0.18.3",
-    "react-native-sound": "^0.10.4",
+    "react-native-notifications": "^1.2.0",
+    "react-native-sound": "git+https://github.com/zmxv/react-native-sound.git",
     "react-native-vector-icons": "4.5.0",
     "rn-viewpager": "^1.2.9"
   },
