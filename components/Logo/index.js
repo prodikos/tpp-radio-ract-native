@@ -19,23 +19,24 @@ export default class Logo extends React.Component {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            height: 80
+            height: 60,
+            marginBottom: 5
           }}
         >
           <Image
-            style={{ width: 55, height: 65 }}
+            style={{ width: 41.25, height: 48.75 }}
             source={require("./assets/logo.png")}
           />
-          <View style={{ height: 60, paddingLeft: 8 }}>
-            <Text style={{ color: "#FFF", fontFamily: 'RobotoSlab-Regular', fontSize: 30 }}>
+          <View style={{ height: 45, paddingLeft: 11 }}>
+            <Text style={{ color: "#FFF", fontFamily: 'RobotoSlab-Regular', fontSize: 23 }}>
               The Press Project
             </Text>
             <Text
               style={{
                 color: "#b3c9d2",
                 fontFamily: 'RobotoSlab-Regular',
-                fontSize: 12,
-                paddingLeft: 4
+                fontSize: 11,
+                paddingLeft: 2
               }}
             >
               Αντικειμενική ενημέρωση, στην τσέπη σου
