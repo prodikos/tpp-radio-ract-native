@@ -33,6 +33,7 @@ class NewsProvider extends EventEmitter {
       }
 
       this.news = JSON.parse(dNews);
+
       console.debug(`Newsfeed: Recovered ${this.news.length} items`);
       return this.news;
     });
@@ -50,9 +51,6 @@ class NewsProvider extends EventEmitter {
     // Inject item metadata
     item.meta = {};
     this.news.push(item);
-
-    // Sort item by date, ascending
-    this.news.sort((a,b) => Date.parse(a.date) - Date.parse(b.date))
 
     // Drop over-capacity items
     if (this.news.length > this.capacity) {

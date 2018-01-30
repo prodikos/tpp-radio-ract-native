@@ -10,8 +10,11 @@ import {
   RefreshControl
 } from "react-native";
 import { Card, ListItem, Button } from "react-native-elements";
+import moment from "moment";
 
 import NewsProvider from "../../util/NewsProvider";
+
+const DATE_FORMAT = "YYYY-MM-DD HH:mm:ss";
 
 export default class NewsPanel extends React.Component {
   static propTypes = {
@@ -46,12 +49,14 @@ export default class NewsPanel extends React.Component {
   handleNewsUpdate = news => {
     const { topNews } = this.props;
     const sorted = news.map(item =>
-      Object.assign({}, item, { key: item.guid })
+      Object.assign({}, item, { key: item.guid, ts: moment(item.date, DATE_FORMAT).unix() })
+    ).sort(
+      (a, b) => b.ts - a.ts
     );
-    sorted.reverse();
 
     const news_top = sorted.slice(0, topNews);
     const news_other = sorted.slice(topNews);
+
     this.setState({ news_top, news_other, refreshing: false });
   };
 
