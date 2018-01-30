@@ -4,8 +4,8 @@
 
 ## Overview
 
-![News](/doc/images/panel-news.png?raw=true) ![Radio Program](/doc/images/panel-radio.png?raw=true)
- ![Chat](/doc/images/panel-chat.png?raw=true)
+![News](/doc/images/panel-news.png?raw=true | width=200) ![Radio Program](/doc/images/panel-radio.png?raw=true | width=200)
+ ![Chat](/doc/images/panel-chat.png?raw=true | width=200)
 
 This application is available for both Android and iOS, however not yet available in the stores since it's currently in development.
 
