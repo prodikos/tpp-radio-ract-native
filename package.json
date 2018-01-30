@@ -1,16 +1,18 @@
 {
   "name": "TPPRadio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "devDependencies": {
     "jest-expo": "23.0.0",
+    "react-native-version": "^2.4.1",
     "react-test-renderer": "16.0.0"
   },
   "scripts": {
     "start": "react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "test": "node node_modules/jest/bin/jest.js --watch"
+    "test": "node node_modules/jest/bin/jest.js --watch",
+    "postversion": "react-native-version"
   },
   "jest": {
     "preset": "jest-expo"
