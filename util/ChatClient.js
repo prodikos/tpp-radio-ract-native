@@ -6,7 +6,7 @@ import { urlEncode } from "./Network";
  * Parse chat features from the HTML response
  */
 function parseMessageFeatures(message_html) {
-  const PARSE_MSGTAGS = /<span class="(.*?)">(.*?)<.*?>|<img .*?src="(.*?)".*?>|<a href="(.*?)".*?>(.*?)<\/a>/;
+  const PARSE_MSGTAGS = /<span class="(.*?)">(.*?)<.*?>|<a href="(.*?)".*?class="(.*?)".*?<img src="(.*?)".*?\/a>|<img .*?src="(.*?)".*?>|<a href="(.*?)".*?>(.*?)<\/a>/;
   var m,
     chunks = [],
     message = message_html.trim();
@@ -38,19 +38,28 @@ function parseMessageFeatures(message_html) {
           });
       }
 
-      // Handle images
+      // Embeds (links with icons)
     } else if (m[3]) {
       chunks.push({
+        type: "embed",
+        href: m[3],
+        class: m[4],
+        img: m[5]
+      });
+
+      // Handle images
+    } else if (m[6]) {
+      chunks.push({
         type: "image",
-        src: m[3]
+        src: m[6]
       });
 
       // Handle links
-    } else if (m[4]) {
+    } else if (m[7]) {
       chunks.push({
         type: "link",
-        href: m[4],
-        text: m[5]
+        href: m[7],
+        text: m[8]
       });
     }
   }
