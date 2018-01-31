@@ -22,12 +22,25 @@ export default class ChatMessage extends React.Component {
           </Text>
         );
 
+      case "embed":
+        return (
+          <Text
+            key={idx}
+            onPress={() => Linking.openURL(fragment.href)}
+          >
+            <InlineImage
+              source={{ uri: `${this.props.chatBaseUrl}/${fragment.img}` }}
+              style={{ width: 26, height: 26, marginTop: 8 }}
+            />
+          </Text>
+        );
+
       case "image":
         return (
           <InlineImage
             key={idx}
             source={{ uri: `${this.props.chatBaseUrl}/${fragment.src}` }}
-            style={{ width: 26, height: 26 }}
+            style={{ width: 26, height: 26, marginTop: 8 }}
           />
         );
 
