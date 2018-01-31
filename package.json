@@ -1,6 +1,6 @@
 {
   "name": "TPPRadio",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "devDependencies": {
     "jest-expo": "23.0.0",
