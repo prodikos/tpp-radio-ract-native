@@ -29,6 +29,7 @@ export default class NewsPanel extends React.Component {
     super(props);
 
     this.updateTimer = null;
+    this.updateTimerTicks = 0;
     this.state = {
       news_top: [],
       news_other: [],
@@ -63,9 +64,16 @@ export default class NewsPanel extends React.Component {
     this.setState({ news_top, news_other, refreshing: false });
   };
 
+  handleUpdateNewsTick = () => {
+    if (++this.updateTimerTicks >= 5) {
+      this.updateTimerTicks = 0;
+      this.updateNews();
+    }
+  };
+
   componentDidMount() {
     NewsProvider.on("update", this.handleNewsUpdate);
-    this.updateTimer = setInterval(this.updateNews, 60000);
+    this.updateTimer = setInterval(this.handleUpdateNewsTick, 60000);
     NewsProvider.lastResults().then(news => {
       this.handleNewsUpdate(news);
       NewsProvider.update()
