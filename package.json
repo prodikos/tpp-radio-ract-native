@@ -25,6 +25,7 @@
     "react": "16.0.0",
     "react-native": "0.50.3",
     "react-native-elements": "^0.18.3",
+    "react-native-exit-app": "^1.0.0",
     "react-native-htmlview": "^0.12.1",
     "react-native-notifications": "^1.2.0",
     "react-native-sound": "git+https://github.com/zmxv/react-native-sound.git",

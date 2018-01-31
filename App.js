@@ -1,5 +1,14 @@
 import React from "react";
-import { BackHandler, Animated, StyleSheet, Text, View, ScrollView } from "react-native";
+import {
+  BackHandler,
+  Animated,
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  ToastAndroid,
+  Platform
+} from "react-native";
 import { IndicatorViewPager, PagerDotIndicator } from "rn-viewpager";
 
 import { getConfig } from "./util/ConfigManager";
@@ -9,13 +18,14 @@ import Logo from "./components/Logo";
 import ChatPanel from "./components/ChatPanel";
 import AudioPanel from "./components/AudioPanel";
 import ProgramPanel from "./components/ProgramPanel";
-import NewsPanel from './components/NewsPanel';
+import NewsPanel from "./components/NewsPanel";
+import RNExitApp from "react-native-exit-app";
 
 export default class App extends React.Component {
   state = {
     stream: null,
     autoplay: false,
-    chatBaseUrl: '',
+    chatBaseUrl: "",
     backPressed: false
   };
 
@@ -23,13 +33,16 @@ export default class App extends React.Component {
    * Double-back exits the app, single tap is ignored
    */
   handleBackPress = () => {
-    const {backPressed} = this.state;
+    const { backPressed } = this.state;
     if (backPressed) {
-      BackHandler.exitApp();
+      RNExitApp.exitApp();
     } else {
-      this.setState({backPressed: true});
+      if (Platform.OS !== "ios") {
+        ToastAndroid.show("Press again to exit", ToastAndroid.SHORT);
+      }
+      this.setState({ backPressed: true });
       setTimeout(() => {
-        this.setState({backPressed: false})
+        this.setState({ backPressed: false });
       }, 1000);
     }
 
@@ -37,21 +50,23 @@ export default class App extends React.Component {
   };
 
   componentDidMount() {
-    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+    BackHandler.addEventListener("hardwareBackPress", this.handleBackPress);
     getConfig().then(({ chatBaseUrl, schedule, stream }) => {
       this.setState({
-        stream, schedule, chatBaseUrl,
-        autplay: getCurrentBroadcast(schedule)
+        stream,
+        schedule,
+        chatBaseUrl,
+        autoplay: !!getCurrentBroadcast(schedule)
       });
     });
   }
 
   componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);
+    BackHandler.removeEventListener("hardwareBackPress", this.handleBackPress);
   }
 
   render() {
-    const { chatBaseUrl, schedule, stream, autplay } = this.state;
+    const { chatBaseUrl, schedule, stream, autoplay } = this.state;
 
     return (
       <View style={styles.container}>
@@ -72,7 +87,7 @@ export default class App extends React.Component {
               <ChatPanel chatBaseUrl={chatBaseUrl} />
             </View>
           </IndicatorViewPager>
-          <AudioPanel stream={stream} autoplay={autplay} />
+          <AudioPanel stream={stream} autoplay={autoplay} />
         </View>
       </View>
     );
