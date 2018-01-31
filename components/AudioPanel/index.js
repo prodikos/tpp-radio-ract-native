@@ -4,7 +4,7 @@ import { Avatar } from "react-native-elements";
 
 import ProgramPlayingNowText from "../ProgramPlayingNowText";
 import AudioPlayer from "../AudioPlayer";
-import SystemNotification from '../SystemNotification';
+import SystemNotification from "../SystemNotification";
 
 export default class AudioPanel extends React.Component {
   constructor(props) {
@@ -42,7 +42,7 @@ export default class AudioPanel extends React.Component {
     const { volume, playing, busy, message, live, buffering } = this.state;
     const { stream } = this.props;
 
-    const sliderMargin = (Platform.OS == 'ios') ? 10 : 0;
+    const sliderMargin = Platform.OS == "ios" ? 10 : 0;
 
     return (
       <View
@@ -62,7 +62,7 @@ export default class AudioPanel extends React.Component {
           }}
         >
           <Slider
-            style={{marginLeft: sliderMargin, marginRight: sliderMargin}}
+            style={{ marginLeft: sliderMargin, marginRight: sliderMargin }}
             thumbTintColor="#666"
             minimumTrackTintColor="#666"
             value={volume}
@@ -78,17 +78,17 @@ export default class AudioPanel extends React.Component {
               paddingBottom: 10
             }}
           >
-            {(playing && (busy || buffering)) ? (
-                <View>
-                  <ActivityIndicator
-                    style={{paddingLeft: 10}}
-                    color="#00ff00"
-                    size="small"
-                  />
-                </View>
-              ) : (
-                <View />
-              )}
+            {playing && (busy || buffering) ? (
+              <View>
+                <ActivityIndicator
+                  style={{ paddingLeft: 10 }}
+                  color="#00ff00"
+                  size="small"
+                />
+              </View>
+            ) : (
+              <View />
+            )}
             {live ? (
               <ProgramPlayingNowText
                 style={{ fontSize: 12, color: "#fff", marginLeft: 10 }}
@@ -120,7 +120,8 @@ export default class AudioPanel extends React.Component {
         <SystemNotification
           title="TPP.Radio"
           message="You are currently listening to TPP Radio"
-          visible={playing} />
+          visible={playing}
+        />
       </View>
     );
   }
