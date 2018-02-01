@@ -1,6 +1,10 @@
+import { Html5Entities } from 'html-entities';
+
 import { getClientIdAsync, renewClientIdAsync } from "./ClientID";
 import { getConfig } from "./ConfigManager";
 import { urlEncode } from "./Network";
+
+const htmlEntities = new Html5Entities();
 
 /**
  * Parse chat features from the HTML response
@@ -9,7 +13,7 @@ function parseMessageFeatures(message_html) {
   const PARSE_MSGTAGS = /<span class="(.*?)">(.*?)<.*?>|<a href="(.*?)".*?class="(.*?)".*?<img src="(.*?)".*?\/a>|<img .*?src="(.*?)".*?>|<a href="(.*?)".*?>(.*?)<\/a>/;
   var m,
     chunks = [],
-    message = message_html.trim();
+    message = htmlEntities.decode(message_html.trim());
 
   // Try to extract features in the message in separate chuns
   while ((m = PARSE_MSGTAGS.exec(message))) {
@@ -138,7 +142,9 @@ class ChatClient {
    */
   updateUserPresence() {
     return getConfig().then(({ chatBaseUrl }) =>
-      fetch(chatBaseUrl + "/system/user_status.php?_=" + Date.now())
+      fetch(chatBaseUrl + "/system/data_update.php?_=" + Date.now()).then(() =>
+        fetch(chatBaseUrl + "/system/user_status.php?_=" + Date.now())
+      )
     );
   }
 
