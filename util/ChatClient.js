@@ -1,10 +1,8 @@
-import { Html5Entities } from 'html-entities';
+import entities from 'entities';
 
 import { getClientIdAsync, renewClientIdAsync } from "./ClientID";
 import { getConfig } from "./ConfigManager";
 import { urlEncode } from "./Network";
-
-const htmlEntities = new Html5Entities();
 
 /**
  * Parse chat features from the HTML response
@@ -13,7 +11,7 @@ function parseMessageFeatures(message_html) {
   const PARSE_MSGTAGS = /<span class="(.*?)">(.*?)<.*?>|<a href="(.*?)".*?class="(.*?)".*?<img src="(.*?)".*?\/a>|<img .*?src="(.*?)".*?>|<a href="(.*?)".*?>(.*?)<\/a>/;
   var m,
     chunks = [],
-    message = htmlEntities.decode(message_html.trim());
+    message = entities.decodeHTML(message_html.trim());
 
   // Try to extract features in the message in separate chuns
   while ((m = PARSE_MSGTAGS.exec(message))) {
