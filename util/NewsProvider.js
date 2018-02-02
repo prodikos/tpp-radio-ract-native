@@ -1,8 +1,33 @@
-import { parseString } from "react-native-xml2js";
+import { Parser } from "htmlparser2-without-node-native";
 import { AsyncStorage } from "react-native";
 import { EventEmitter } from "events";
+import ExtendedFeedHandler from './ExtendedFeedHandler';
 
 import { getConfig } from "./ConfigManager";
+
+/**
+ * Parse the RSS/RDF/Atom contents from the string given using
+ * the htmlparser2 FeedHandler. This will yield an object with
+ * an `items` array, with the news items.
+ */
+function parseFeedString(rss) {
+  return new Promise((resolve, reject) => {
+    const handler = new ExtendedFeedHandler((error, feed) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(feed);
+    });
+    const dom = handler.dom;
+    const parser = new Parser(handler, {
+      decodeEntities: true,
+      xmlMode: true
+    });
+    parser.write(rss);
+    parser.end();
+  });
+}
 
 /**
  * A registry of news entries
@@ -112,75 +137,33 @@ class NewsProvider extends EventEmitter {
               return this.news;
             }
 
-            return new Promise(resolve => {
-              this._changedFlag = false;
-              parseString(buffer, (err, result) => {
-                if (err) {
-                  console.debug(`Newsfeed: Unable to parse XML Feed: ${err}`);
-                  resolve(this.news);
-                  return;
-                }
+            this._changedFlag = false;
 
-                if (result.rss == null) {
-                  console.debug(`Newsfeed: <rss> tag not found`);
-                  resolve(this.news);
-                  return;
-                }
-                if (!Array.isArray(result.rss.channel)) {
-                  console.debug(
-                    `Newsfeed: Invalid or missing <channel> tag not found`
-                  );
-                  resolve(this.news);
-                  return;
-                }
+            // return new Promise(resolve => {
 
-                // Process channels and their items
-                result.rss.channel.forEach(channel => {
-                  if (!Array.isArray(channel.item)) {
-                    console.debug(
-                      `Newsfeed: Invalid or missing <item> tag not found`
-                    );
-                    return;
-                  }
+            return parseFeedString(buffer).then(feed => {
+              const channelMeta = {
+                description: feed.description,
+                title: feed.title
+              };
 
-                  // Get channel metadata
-                  const channelMeta = {
-                    title: channel.title && channel.title[0],
-                    link: channel.link && channel.link[0],
-                    description: channel.description && channel.description[0]
-                  };
+              (feed.items || []).forEach(item => {
+                // Get item metadata
+                const itemMeta = {
+                  guid: item.id,
+                  title: item.title,
+                  link: item.link,
+                  image: item.image,
+                  date: item.pubDate,
+                  description: item.description
+                };
 
-                  console.debug(`Newsfeed: Processing channel`, channelMeta);
-                  channel.item.forEach(item => {
-                    // Get item metadata
-                    const itemMeta = {
-                      guid: item.guid && item.guid[0],
-                      title: item.title && item.title[0],
-                      link: item.link && item.link[0],
-                      image: item.image && item.image[0].url && item.image[0].url[0],
-                      date: item.pubDate && item.pubDate[0],
-                      description: item.description && item.description[0]
-                    };
-
-                    // Process the RSS item
-                    console.debug(`Newsfeed: Found item`, itemMeta);
-                    this.handleRSSItem(itemMeta, channelMeta);
-                  });
-                });
-
-                // If we were changed, save changes and trigger update event
-                if (this._changedFlag) {
-                  console.debug(`Newsfeed: There were items added, will save`);
-                  this.save();
-                  this.emit("updated");
-                } else {
-                  console.debug(`Newsfeed: No new items discovered`);
-                }
-
-                // Resolve
-                resolve(this.news);
+                // Process the RSS item
+                console.debug(`Newsfeed: Found item`, itemMeta);
+                this.handleRSSItem(itemMeta, channelMeta);
               });
             });
+
           });
         });
       })
