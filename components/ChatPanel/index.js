@@ -43,7 +43,7 @@ export default class ChatPanel extends React.Component {
         });
       })
       .catch(e => {});
-  }
+  };
 
   renderMessage = ({ item, key, index }) => {
     return <ChatMessage chatBaseUrl={this.props.chatBaseUrl} message={item} />;
@@ -87,8 +87,16 @@ export default class ChatPanel extends React.Component {
   }
 
   renderMessages() {
+    const { onScroll } = this.props;
     const { messages } = this.state;
-    return <FlatList data={messages} renderItem={this.renderMessage} />;
+    return (
+      <FlatList
+        scrollEventThrottle={16}
+        onScroll={onScroll}
+        data={messages}
+        renderItem={this.renderMessage}
+      />
+    );
   }
 
   render() {

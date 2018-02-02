@@ -7,18 +7,23 @@ import { getScheduleTable } from "../../util/Schedule";
 
 export default class ProgramPanel extends React.Component {
   static propTypes = {
-    schedule: PropTypes.object
+    schedule: PropTypes.object,
+    onScroll: PropTypes.func
   };
 
   render() {
-    const { schedule } = this.props;
+    const { schedule, onScroll } = this.props;
     if (!schedule) {
       return <View />;
     }
 
     const scheduleTable = getScheduleTable(schedule);
     return (
-      <ScrollView style={{ flex: 1, backgroundColor: "#1c1c1c" }}>
+      <ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        style={{ flex: 1, backgroundColor: "#1c1c1c" }}
+      >
         {scheduleTable.map((entry, idx) => (
           <ProgramEntryDay schedule={schedule} entry={entry} key={idx} />
         ))}

@@ -18,6 +18,7 @@ const DATE_FORMAT = "YYYY-MM-DD HH:mm:ss";
 
 export default class NewsPanel extends React.Component {
   static propTypes = {
+    onScroll: PropTypes.func,
     topNews: PropTypes.number
   };
 
@@ -180,6 +181,7 @@ export default class NewsPanel extends React.Component {
   };
 
   render() {
+    const { onScroll } = this.props;
     const { news_top, news_other, refreshing, portrait } = this.state;
 
     return (
@@ -192,6 +194,8 @@ export default class NewsPanel extends React.Component {
         onLayout={this.handleLayoutUpdate}
       >
         <SectionList
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

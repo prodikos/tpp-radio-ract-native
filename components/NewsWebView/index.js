@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import NewsTextView from "../NewsTextView";
+import SlideHideWrapper from "../SlideHideWrapper";
 import { scrapeFromURL } from "../../util/NewsScraper";
 
 const LINK_TPP_ARTICLE = /^https?:\/\/[\w+.]*(thepressproject|tpp).gr\/article/;
@@ -67,7 +68,7 @@ export default class NewsWebView extends React.Component {
   }
 
   componentWillReceiveProps(newProps) {
-    if (newProps.url !== this.url) {
+    if (newProps.url !== this.props.url) {
       this.setState({ url: newProps.url });
       this.loadContents(newProps.url);
     }
@@ -122,10 +123,14 @@ export default class NewsWebView extends React.Component {
     const { body, title, image } = this.state;
 
     return (
-      <ScrollView onScroll={onScroll} scrollEventThrottle={16} style={[style, { flex: 1, backgroundColor: "#fff" }]}>
+      <ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        style={[style, { flex: 1, backgroundColor: "#fff" }]}
+      >
         {image ? (
-          <Image source={{uri: image}} style={{height: 200}} />
-        ): null}
+          <Image source={{ uri: image }} style={{ height: 200 }} />
+        ) : null}
         <Text
           style={{
             fontFamily: "RobotoSlab-Bold",
@@ -136,7 +141,7 @@ export default class NewsWebView extends React.Component {
           {title}
         </Text>
         <NewsTextView
-          style={{marginLeft: 10, marginRight: 10}}
+          style={{ marginLeft: 10, marginRight: 10 }}
           value={body}
           onLinkPress={this.handleLinkClickk}
           onLinkLongPress={this.handleLinkOpen}

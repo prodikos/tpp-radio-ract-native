@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React from "react";
 import { Text, View, Slider, ActivityIndicator, Platform } from "react-native";
 import { Avatar } from "react-native-elements";
@@ -7,6 +8,14 @@ import AudioPlayer from "../AudioPlayer";
 import SystemNotification from "../SystemNotification";
 
 export default class AudioPanel extends React.Component {
+  static propTypes = {
+    style: PropTypes.object
+  };
+
+  static defaultProps = {
+    style: {}
+  };
+
   constructor(props) {
     super(props);
 
@@ -40,18 +49,21 @@ export default class AudioPanel extends React.Component {
 
   render() {
     const { volume, playing, busy, message, live, buffering } = this.state;
-    const { stream } = this.props;
+    const { stream, style } = this.props;
 
     const sliderMargin = Platform.OS == "ios" ? 10 : 0;
 
     return (
       <View
-        style={{
-          backgroundColor: "#333",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center"
-        }}
+        style={[
+          {
+            backgroundColor: "#333",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center"
+          },
+          style
+        ]}
       >
         <View
           style={{

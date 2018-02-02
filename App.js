@@ -7,9 +7,11 @@ import {
   View,
   ScrollView,
   ToastAndroid,
-  Platform
+  Platform,
+  LayoutAnimation
 } from "react-native";
 import { IndicatorViewPager, PagerDotIndicator } from "rn-viewpager";
+import RNExitApp from "react-native-exit-app";
 
 import { getConfig } from "./util/ConfigManager";
 import { getCurrentBroadcast } from "./util/Schedule";
@@ -19,14 +21,16 @@ import ChatPanel from "./components/ChatPanel";
 import AudioPanel from "./components/AudioPanel";
 import ProgramPanel from "./components/ProgramPanel";
 import NewsPanel from "./components/NewsPanel";
-import RNExitApp from "react-native-exit-app";
+import SlideHideController from "./util/SlideHideController";
 
 export default class App extends React.Component {
+  slideHideController = new SlideHideController({ distance: 60 });
   state = {
     stream: null,
     autoplay: false,
     chatBaseUrl: "",
-    backPressed: false
+    backPressed: false,
+    hideBars: false
   };
 
   /**
@@ -59,35 +63,65 @@ export default class App extends React.Component {
         autoplay: !!getCurrentBroadcast(schedule)
       });
     });
+
+    this.slideHideController.onHideChangeCallback = pos => {
+      const hideBars = pos > 0.5;
+
+      if (hideBars != this.state.hideBars) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        this.setState({ hideBars });
+      }
+    };
   }
 
   componentWillUnmount() {
     BackHandler.removeEventListener("hardwareBackPress", this.handleBackPress);
+    this.slideHideController.onHideChangeCallback = () => {};
   }
 
   render() {
-    const { chatBaseUrl, schedule, stream, autoplay } = this.state;
+    const {
+      chatBaseUrl,
+      schedule,
+      stream,
+      autoplay,
+      hideBars
+    } = this.state;
 
     return (
       <View style={styles.container}>
-        <View style={{ height: 18 }} />
-        <Logo />
+        <View style={{ marginTop: hideBars ? -60 : 0  }}>
+          <View style={{ height: hideBars ? 0 : 18 }} />
+          <Logo />
+          <View style={{ height: hideBars ? 18 : 0 }} />
+        </View>
         <View style={{ flex: 1 }}>
           <IndicatorViewPager
             style={{ flex: 1 }}
             indicator={<PagerDotIndicator pageCount={3} />}
           >
             <View>
-              <NewsPanel topNews={5} />
+              <NewsPanel
+                onScroll={this.slideHideController.handleFor("news")}
+                topNews={5}
+              />
             </View>
             <View>
-              <ProgramPanel schedule={schedule} />
+              <ProgramPanel
+                onScroll={this.slideHideController.handleFor("program")}
+                schedule={schedule}
+              />
             </View>
             <View>
-              <ChatPanel chatBaseUrl={chatBaseUrl} />
+              <ChatPanel
+                onScroll={this.slideHideController.handleFor("chat")}
+                chatBaseUrl={chatBaseUrl}
+              />
             </View>
           </IndicatorViewPager>
-          <AudioPanel stream={stream} autoplay={autoplay} />
+          <View style={{ marginBottom: hideBars ? -60 }}>
+            <AudioPanel stream={stream} autoplay={autoplay} />
+          </View>
         </View>
       </View>
     );

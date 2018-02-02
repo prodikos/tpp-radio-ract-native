@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React from "react";
 import {
   Image,
@@ -8,8 +9,17 @@ import {
 } from "react-native";
 
 export default class Logo extends React.Component {
+  static propTypes = {
+    height: PropTypes.number,
+  };
+
+  static defaultProps = {
+    height: 60
+  };
 
   render() {
+    const {height} = this.props;
+
     return (
       <TouchableWithoutFeedback
         onPress={() => Linking.openURL("https://www.thepressproject.gr/")}
@@ -19,7 +29,7 @@ export default class Logo extends React.Component {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            height: 60,
+            height: height,
             marginBottom: 5
           }}
         >
