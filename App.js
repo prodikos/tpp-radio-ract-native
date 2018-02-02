@@ -119,7 +119,7 @@ export default class App extends React.Component {
               />
             </View>
           </IndicatorViewPager>
-          <View style={{ marginBottom: hideBars ? -60 }}>
+          <View style={{ marginBottom: hideBars ? -60 : 0 }}>
             <AudioPanel stream={stream} autoplay={autoplay} />
           </View>
         </View>
