@@ -7,18 +7,25 @@ import {
   FlatList,
   Text,
   View,
-  RefreshControl
+  RefreshControl,
+  LayoutAnimation,
+  ScrollView
 } from "react-native";
 import { Card, ListItem, Button } from "react-native-elements";
 import moment from "moment";
 
 import NewsProvider from "../../util/NewsProvider";
+import NewsListView from "../NewsListView";
+import NewsWebView from "../NewsWebView";
+import HidablePopOverView from '../HidablePopOverView';
 
 const DATE_FORMAT = "YYYY-MM-DD HH:mm:ss";
 
 export default class NewsPanel extends React.Component {
   static propTypes = {
     onScroll: PropTypes.func,
+    onFullViewScroll: PropTypes.func,
+    onBlockScroll: PropTypes.func,
     topNews: PropTypes.number
   };
 
@@ -35,7 +42,10 @@ export default class NewsPanel extends React.Component {
       news_top: [],
       news_other: [],
       refreshing: false,
-      portrait: true
+      portrait: true,
+      fullTextVisible: false,
+      fullTextUrl: "",
+      width: 0
     };
   }
 
@@ -44,7 +54,8 @@ export default class NewsPanel extends React.Component {
       height = e.nativeEvent.layout.height;
 
     this.setState({
-      portrait: height > width
+      portrait: height > width,
+      width: width
     });
   };
 
@@ -72,6 +83,30 @@ export default class NewsPanel extends React.Component {
     }
   };
 
+  handleOpenFullText = article => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (this.state.fullTextVisible) {
+      this.setState({
+        fullTextVisible: false
+      });
+      this.props.onBlockScroll(false);
+    } else {
+      this.setState({
+        fullTextVisible: true,
+        fullTextUrl: article.link
+      });
+      this.props.onBlockScroll(true);
+    }
+  };
+
+  handleCloseFulltext = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    this.setState({
+      fullTextVisible: false
+    });
+    this.props.onBlockScroll(false);
+  };
+
   componentDidMount() {
     NewsProvider.on("update", this.handleNewsUpdate);
     this.updateTimer = setInterval(this.handleUpdateNewsTick, 60000);
@@ -95,129 +130,47 @@ export default class NewsPanel extends React.Component {
       .catch(_ => this.setState({ refreshing: false }));
   };
 
-  renderTopNewsItem = ({ item }) => {
-    const image = item.image.replace("project/", "project.gr/");
-    const content = item.description
-      .replace(/<br><br>/g, "<br>")
-      .replace(/^<b><\/b><br>/, "");
-
-    return (
-      <Card
-        key={item.guid}
-        featuredTitle={item.title}
-        featuredTitleStyle={{ padding: 10 }}
-        image={{ uri: image }}
-      >
-        <HTMLView value={content} />
-        <View>
-          <Text style={{ fontSize: 10, textAlign: "right", color: "#CCC" }}>
-            {item.date}
-          </Text>
-        </View>
-      </Card>
-    );
-  };
-
-  renderSmallNewsItem = ({ item, index }) => {
-    const image = item.image.replace("project/", "project.gr/");
-    const content = item.description
-      .replace(/<br><br>/g, "<br>")
-      .replace(/^<b><\/b><br>/, "");
-
-    const backgroundColor = index % 2 == 0 ? "#EEE" : "#FFF";
-
-    return (
-      <View
-        key={item.guid}
-        style={{
-          backgroundColor,
-          marginLeft: 12,
-          marginRight: 12,
-          marginTop: 10,
-          padding: 8
-        }}
-      >
-        <View style={{ marginBottom: 4 }}>
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item.title}</Text>
-        </View>
-        <HTMLView value={content} />
-        <View>
-          <Text style={{ fontSize: 10, textAlign: "right", color: "#CCC" }}>
-            {item.date}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
-  renderSectionHeader = ({ section }) => {
-    return (
-      <View
-        style={{
-          borderBottomColor: "#CCC",
-          backgroundColor: "#eee",
-          borderBottomWidth: 2,
-          marginLeft: 10,
-          paddingTop: 10,
-          marginRight: 10,
-          paddingBottom: 6
-        }}
-      >
-        <Text
-          style={{
-            color: "#999",
-            fontFamily: "RobotoSlab-Regular",
-            fontSize: 24
-          }}
-        >
-          <Text style={{ color: "#e6222e", fontFamily: "RobotoSlab-Bold" }}>
-            »
-          </Text>
-          {` `}
-          {section.title}
-        </Text>
-      </View>
-    );
-  };
-
   render() {
-    const { onScroll } = this.props;
-    const { news_top, news_other, refreshing, portrait } = this.state;
+    const { onScroll, onFullViewScroll } = this.props;
+    const {
+      news_top,
+      news_other,
+      refreshing,
+      portrait,
+      fullTextVisible,
+      fullTextUrl,
+      width
+    } = this.state;
 
     return (
       <View
         style={{
           flex: 1,
           flexDirection: "row",
-          backgroundColor: "#eeeeee"
+          backgroundColor: "#000"
         }}
         onLayout={this.handleLayoutUpdate}
       >
-        <SectionList
+        <NewsListView
           onScroll={onScroll}
-          scrollEventThrottle={16}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={this.updateNews}
-            />
-          }
-          style={{ flex: 1 }}
-          stickySectionHeadersEnabled={portrait}
-          renderSectionHeader={this.renderSectionHeader}
-          sections={[
-            {
-              title: "Τελευταίες Ειδήσεις",
-              data: news_top,
-              renderItem: this.renderTopNewsItem
-            },
-            {
-              title: "Όλες οι Ειδήσεις",
-              data: news_other,
-              renderItem: this.renderSmallNewsItem
-            }
-          ]}
+          onRefresh={this.updateNews}
+          onArticleTap={this.handleOpenFullText}
+          faded={fullTextVisible}
+          refreshing={refreshing}
+          topArticles={news_top}
+          otherArticles={news_other}
+          stickyHeaders={portrait}
+          style={{
+            left: fullTextVisible ? -20 : 0
+          }}
         />
+        <HidablePopOverView
+          width={width}
+          open={fullTextVisible}
+          onClose={this.handleCloseFulltext}
+           >
+            <NewsWebView onScroll={onFullViewScroll} url={fullTextUrl} />
+        </HidablePopOverView>
       </View>
     );
   }

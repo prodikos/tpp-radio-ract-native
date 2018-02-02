@@ -30,7 +30,8 @@ export default class App extends React.Component {
     autoplay: false,
     chatBaseUrl: "",
     backPressed: false,
-    hideBars: false
+    hideBars: false,
+    scrollEnabled: true
   };
 
   /**
@@ -51,6 +52,12 @@ export default class App extends React.Component {
     }
 
     return true;
+  };
+
+  handleBlockScroll = blocked => {
+    this.setState({
+      scrollEnabled: !blocked
+    });
   };
 
   componentDidMount() {
@@ -85,12 +92,13 @@ export default class App extends React.Component {
       schedule,
       stream,
       autoplay,
-      hideBars
+      hideBars,
+      scrollEnabled
     } = this.state;
 
     return (
       <View style={styles.container}>
-        <View style={{ marginTop: hideBars ? -60 : 0  }}>
+        <View style={{ marginTop: hideBars ? -60 : 0 }}>
           <View style={{ height: hideBars ? 0 : 18 }} />
           <Logo />
           <View style={{ height: hideBars ? 18 : 0 }} />
@@ -99,10 +107,13 @@ export default class App extends React.Component {
           <IndicatorViewPager
             style={{ flex: 1 }}
             indicator={<PagerDotIndicator pageCount={3} />}
+            scrollEnabled={scrollEnabled}
           >
             <View>
               <NewsPanel
                 onScroll={this.slideHideController.handleFor("news")}
+                onFullViewScroll={this.slideHideController.handleFor("full")}
+                onBlockScroll={this.handleBlockScroll}
                 topNews={5}
               />
             </View>
